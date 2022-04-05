@@ -2,8 +2,8 @@
 
 #include "macro_definition.hpp"
 
-namespace templatelib {
-    struct EXPORT_TEMPLATE_LIB Type {
+namespace laplacian {
+    struct EXPORT_LAPLACIAN_PYRAMID Type {
         explicit Type(int value = 0);
 
         int _value;

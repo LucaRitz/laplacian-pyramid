@@ -3,12 +3,12 @@
 #include "macro_definition.hpp"
 #include "type.hpp"
 
-namespace templatelib {
+namespace laplacian {
     /**
      * Generates a type.
      *
      * @param value The value to take.
      *
      */
-    EXPORT_TEMPLATE_LIB Type type(int value);
+    EXPORT_LAPLACIAN_PYRAMID Type type(int value);
 }

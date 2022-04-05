@@ -1,4 +1,4 @@
-project(app) # TODO: Rename
+project(app)
 
 add_executable(${PROJECT_NAME})
 
@@ -14,8 +14,7 @@ add_custom_command(TARGET ${PROJECT_NAME}
         POST_BUILD
 
         # Copy dependencies to binary folder
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:template_lib> ${PROJECT_BINARY_DIR}/
-        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:fltk_SHARED> ${PROJECT_BINARY_DIR}/
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:laplacian_pyramid> ${PROJECT_BINARY_DIR}/
         )
 foreach(OpenCV_LIB ${OpenCV_LIBS})
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
@@ -26,6 +25,5 @@ endforeach()
 
 add_subdirectory(src)
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-        TEMPLATE_LIB_IMPORT)
-target_link_libraries(${PROJECT_NAME} PRIVATE template_lib fltk_SHARED)
+target_compile_definitions(${PROJECT_NAME} PRIVATE LAPLACIAN_PYRAMID_IMPORT)
+target_link_libraries(${PROJECT_NAME} PRIVATE laplacian_pyramid)

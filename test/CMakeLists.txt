@@ -1,2 +1,2 @@
 add_subdirectory(ext)
-add_subdirectory(template_lib)
+add_subdirectory(laplacian_pyramid)

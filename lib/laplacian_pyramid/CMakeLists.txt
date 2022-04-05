@@ -1,4 +1,4 @@
-project(template_lib) # TODO: Rename
+project(laplacian_pyramid)
 
 add_library(${PROJECT_NAME} SHARED)
 target_include_directories(${PROJECT_NAME}
@@ -10,4 +10,4 @@ target_include_directories(${PROJECT_NAME}
 
 add_subdirectory(src)
 
-target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBS} glm opengl glad)
+target_link_libraries(${PROJECT_NAME} PUBLIC ${OpenCV_LIBS})

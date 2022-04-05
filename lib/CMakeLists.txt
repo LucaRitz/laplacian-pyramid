@@ -1,1 +1,1 @@
-add_subdirectory(template_lib)
+add_subdirectory(laplacian_pyramid)

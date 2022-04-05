@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-namespace templatelib::test {
+namespace laplacian::test {
     class Environment : public ::testing::Environment {
     public:
         ~Environment() override;
