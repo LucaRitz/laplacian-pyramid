@@ -1,1 +1,1 @@
-add_subdirectory(laplacian_pyramid)
+add_subdirectory(laplacian-pyramid)

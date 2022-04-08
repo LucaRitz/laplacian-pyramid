@@ -1,24 +1,10 @@
-#include <laplacian_pyramid/laplacian_pyramid.hpp>
-#include <iostream>
-#include <opencv2/core.hpp>
-#include <opencv2/imgcodecs.hpp>
-#include <opencv2/highgui.hpp>
-
-using namespace cv;
+#include <laplacian-pyramid/laplacian_pyramid.hpp>
 
 int main(int argc, char* argv[]) {
-    auto result = laplacian::type(10);
-    std::cout << "Type: " << result._value << std::endl;
 
-    String image_path = R"(resources\color_image.jpg)";
-    Mat img = imread(image_path, IMREAD_COLOR);
-    if(img.empty())
-    {
-        std::cout << "Could not read the image: " << image_path << std::endl;
-        return 1;
-    }
-    imshow("Display window", img);
-    waitKey(0); // Wait for a keystroke in the window
+    cv::Mat image = cv::imread("resources/lena.png", cv::IMREAD_GRAYSCALE);
+    image.convertTo(image, CV_32F);
+    auto result = laplacian::LaplacianPyramid{image, 5};
 
     return 0;
 }
