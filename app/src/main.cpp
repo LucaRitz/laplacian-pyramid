@@ -6,5 +6,6 @@ int main(int argc, char* argv[]) {
     image.convertTo(image, CV_32F);
     auto result = laplacian::LaplacianPyramid{image, 5};
 
+
     return 0;
 }
