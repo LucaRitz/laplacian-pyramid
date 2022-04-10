@@ -1,38 +1,50 @@
 #include <laplacian-pyramid/laplacian_pyramid.hpp>
 
 laplacian::LaplacianPyramidException::LaplacianPyramidException(const std::string& message) :
-    _message(message) {
-}
-
-std::string laplacian::LaplacianPyramidException::getMessage() const {
-
-    return _message;
+    std::exception(message.c_str()) {
 }
 
 laplacian::LaplacianPyramid::LaplacianPyramid(const cv::Mat& image,
                                               uint8_t compressions,
                                               float quantization) :
-                                              _laplacianPlanes(),
+                                              _laplacianPlanesQuantized(),
                                               _kernel(kernel()){
 
-    const cv::Mat scaledImage = applyValidScaling(image, compressions);
-    std::vector<cv::Mat> gaussians = reduceToGaussians(scaledImage, _kernel, compressions);
-
+    const auto scaledImage = applyValidScaling(image, compressions);
+    const auto gaussians = reduceToGaussians(scaledImage, _kernel, compressions);
+    const auto upsampledGaussians = upsample(gaussians, _kernel);
+    const auto laplacianPlanes = buildLaplacianPlanes(gaussians, upsampledGaussians);
+    _laplacianPlanesQuantized = quantization == 0 ? laplacianPlanes : quantize(laplacianPlanes, quantization);
 }
 
 cv::Mat laplacian::LaplacianPyramid::decode() const {
 
-    return cv::Mat{};
+    cv::Mat reconstructed = _laplacianPlanesQuantized.at(levels() - 1);
+
+    for (int level = levels() - 2; level >= 0; level--) {
+
+        const auto& laplacian = _laplacianPlanesQuantized.at(level);
+        const auto upsampled = upsample(reconstructed, laplacian.rows, laplacian.cols, _kernel);
+
+        reconstructed = laplacian + upsampled;
+    }
+
+    return reconstructed;
 }
 
 cv::Mat laplacian::LaplacianPyramid::at(uint8_t level) const {
 
-    return cv::Mat{};
+    return _laplacianPlanesQuantized.at(level);
 }
 
 cv::Mat laplacian::LaplacianPyramid::operator[](uint8_t level) const {
 
-    return cv::Mat{};
+    return at(level);
+}
+
+uint8_t laplacian::LaplacianPyramid::levels() const {
+
+    return _laplacianPlanesQuantized.size();
 }
 
 ////////////////////////////////////////
@@ -128,11 +140,6 @@ std::vector<cv::Mat> laplacian::LaplacianPyramid::reduceToGaussians(
                                 static_cast<int>(Mr * std::pow(2, compressions - level) - 3),
                                 static_cast<int>(Mc * std::pow(2, compressions - level)  - 3));
         gaussians.push_back(actual);
-
-        cv::Mat blured;
-        actual.convertTo(blured, CV_8U);
-        cv::imshow("Blured " + level, blured);
-        cv::waitKey(0);
     }
 
     return gaussians;
@@ -161,4 +168,80 @@ cv::Mat laplacian::LaplacianPyramid::reduceGaussian(
         }
     }
     return filtered;
+}
+
+std::vector<cv::Mat> laplacian::LaplacianPyramid::upsample(const std::vector<cv::Mat>& images,
+                                                           const cv::Mat& kernel) const {
+
+    std::vector<cv::Mat> upsampled;
+
+    for (int level = 1; level < images.size(); level++) {
+
+        const auto& imageOfUpperLevel = images.at(level - 1);
+
+        upsampled.emplace_back(upsample(images.at(level), imageOfUpperLevel.rows, imageOfUpperLevel.cols, kernel));
+    }
+
+    return upsampled;
+}
+
+cv::Mat laplacian::LaplacianPyramid::upsample(const cv::Mat& image, int rows, int cols, const cv::Mat& kernel) const {
+
+    cv::Mat upsampled(rows, cols, CV_32F);
+
+    for (int i = 0; i < rows; i++) {
+
+        for (int j = 0; j < cols; j++) {
+
+            float value = 0.0f;
+
+            int kernelHalfRows = (kernel.rows / 2);
+            int kernelHalfCols = (kernel.cols / 2);
+            for(int m = -kernelHalfRows; m <= kernelHalfRows; m++) {
+
+                for(int n = -kernelHalfCols; n <= kernelHalfCols; n++) {
+
+                    float row = static_cast<float>((i - m)) / 2.0f;
+                    float col = static_cast<float>((j - n)) / 2.0f;
+
+                    if (isInteger(row) && row >= 0 &&
+                        isInteger(col) && col >= 0) {
+
+                        col = col < image.cols ? col : image.cols - 1;
+                        row = row < image.rows ? row : image.rows - 1;
+                        value += kernel.at<float>(m + kernelHalfRows, n + kernelHalfCols) * image.at<float>(static_cast<int>(row), static_cast<int>(col));
+                    }
+                }
+            }
+            upsampled.at<float>(i, j) = 4 * value;
+        }
+    }
+
+    return upsampled;
+}
+
+std::vector<cv::Mat> laplacian::LaplacianPyramid::buildLaplacianPlanes(const std::vector<cv::Mat>& gaussians,
+                                          const std::vector<cv::Mat>& upsampled) {
+
+    if (gaussians.size() != (upsampled.size() + 1)) {
+        throw LaplacianPyramidException("The gaussian vector has to have one more image than the upsampled!");
+    }
+
+    std::vector<cv::Mat> laplacian;
+
+    for (int level = 0; level <= gaussians.size() - 2; level++) {
+
+        laplacian.emplace_back(gaussians.at(level) - upsampled.at(level));
+    }
+    laplacian.push_back(gaussians.at(gaussians.size() - 1));
+
+    return laplacian;
+}
+
+std::vector<cv::Mat> laplacian::LaplacianPyramid::quantize(const std::vector<cv::Mat>& laplacianPlanes,
+                              float quantization) const {
+
+    // TODO: Implement uniform quantization
+
+    return laplacianPlanes;
 }

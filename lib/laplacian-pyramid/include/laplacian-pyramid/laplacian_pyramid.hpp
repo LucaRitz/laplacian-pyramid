@@ -8,17 +8,12 @@
 namespace laplacian {
 
     const uint8_t DEFAULT_COMPRESSIONS = 5;
-    const float DEFAULT_QUANTIZATION = 1.0f;
+    const float DEFAULT_QUANTIZATION = 0.0f;
     const float DEFAULT_A = 1.0f;
 
-    class EXPORT_LAPLACIAN_PYRAMID LaplacianPyramidException {
+    class EXPORT_LAPLACIAN_PYRAMID LaplacianPyramidException : public std::exception {
     public:
         explicit LaplacianPyramidException(const std::string& message = "");
-
-        [[nodiscard]] std::string getMessage() const;
-
-    private:
-        std::string _message;
     };
 
     class EXPORT_LAPLACIAN_PYRAMID LaplacianPyramid {
@@ -28,6 +23,8 @@ namespace laplacian {
          *
          * Creates a laplacian pyramid for the given image with the expected compression levels and quantization.
          * The image has to be single channeled and CV_32F encoded.
+         * The default quantization is zero, which means no quantization is applied and the full laplacian planes
+         * are being used.
          *
          * @param image The image to encode.
          * @param compressions The compression levels.
@@ -48,7 +45,7 @@ namespace laplacian {
 
         /**
          *
-         * Gives an encoded laplacian image at the expected level.
+         * Gets an encoded laplacian image at the expected level.
          *
          * @param level The compression level of the expected laplacian image.
          *
@@ -58,7 +55,7 @@ namespace laplacian {
 
         /**
          *
-         * Gives an encoded laplacian image at the expected level.
+         * Gets an encoded laplacian image at the expected level.
          *
          * @param level The compression level of the expected laplacian image.
          *
@@ -66,8 +63,16 @@ namespace laplacian {
          */
         [[nodiscard]] cv::Mat operator[](uint8_t level) const;
 
+        /**
+         *
+         * Gets the levels of the pyramid.
+         *
+         * @return The levels of the pyramid.
+         */
+        [[nodiscard]] uint8_t levels() const;
+
     private:
-        std::unordered_map<uint8_t, cv::Mat> _laplacianPlanes;
+        std::vector<cv::Mat> _laplacianPlanesQuantized;
         cv::Mat _kernel;
 
         /**
@@ -194,5 +199,58 @@ namespace laplacian {
                                const cv::Mat& kernel,
                                int rows,
                                int columns) const;
+
+        /**
+         *
+         * Upsamples the given images to the double of their sizes.
+         *
+         * @param images The images which are to be upsampled.
+         * @param kernel The kernel used for upsampling.
+         *
+         * @return The upsampled images of a corresponding level.
+         */
+        [[nodiscard]] std::vector<cv::Mat> upsample(const std::vector<cv::Mat>& images,
+                                                    const cv::Mat& kernel) const;
+
+        /**
+         *
+         * Upsamples the given image to the given row and column size.
+         *
+         * @param image The image which is to be upsampled.
+         * @param rows The expected row size
+         * @param cols The expeced column size
+         * @param kernel The kernel used for upsampling.
+         *
+         * @return The upsampled image.
+         */
+        [[nodiscard]] cv::Mat upsample(const cv::Mat& image, int rows, int cols, const cv::Mat& kernel) const;
+
+        /**
+         *
+         * Creates the laplacian planes from the given gaussians and upsampled images.
+         * The laplacian image of level "n" is the level "n" image of the gaussians.
+         * The both vectors have to be of the same length.
+         *
+         * @param gaussians The gaussian images.
+         * @param upsampled The upsampled images.
+         *
+         * @return The laplacian images, which are basically the difference images of the given vectors.
+         */
+        [[nodiscard]] std::vector<cv::Mat> buildLaplacianPlanes(const std::vector<cv::Mat>& gaussians,
+                                                                const std::vector<cv::Mat>& upsampled);
+
+        /**
+         *
+         * Quantize uniformly the laplacian planes with the given quantization. The quantization is the delta
+         * of one quantization bin. All the values inside a bin are represented by its middle value.
+         * The amount of bins is getting smaller in lower levels of the pyramid.
+         *
+         * @param laplacianPlanes The laplacian planes which are to be quantized.
+         * @param quantization The uniform quantization of the laplacian planes.
+         *
+         * @return The quantized laplacian planes
+         */
+        [[nodiscard]] std::vector<cv::Mat> quantize(const std::vector<cv::Mat>& laplacianPlanes,
+                                                    float quantization) const;
     };
 }
