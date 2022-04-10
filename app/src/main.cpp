@@ -7,10 +7,10 @@ int main(int argc, char* argv[]) {
         cv::imshow("Original", image);
     }
     image.convertTo(image, CV_32F);
-    auto result = laplacian::LaplacianPyramid{image, 5};
+    auto pyramid = laplacian::LaplacianPyramid{image, 5};
 
     {
-        auto decoded = result.decode();
+        auto decoded = pyramid.decode();
         decoded.convertTo(decoded, CV_8U);
         cv::imshow("Decoded", decoded);
         cv::waitKey(0);
