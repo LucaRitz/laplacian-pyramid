@@ -33,13 +33,24 @@ Tested platforms:
 
 ## Recommended usage in cmake:
 ```cmake
-ExternalProject_add(
-    GIT_REPOSITORY https://github.com/LucaRitz/laplacian-pyramid
-    GIT_TAG        main
-    CMAKE_ARGS
-    -DBUILD_TEST=OFF
-    -DBUILD_DOCUMENTATION=OFF
-    -DBUILD_CODE_DOCUMENTATION=OFF
-    -DBUILD_EXT_LIBS=OFF
+include(FetchContent)
+
+option(BUILD_TEST "" OFF)
+option(BUILD_DOCUMENTATION "" OFF)
+option(BUILD_CODE_DOCUMENTATION "" OFF)
+option(BUILD_EXT_LIBS "" OFF)
+
+FetchContent_Declare(
+        laplacian_pyramid
+        GIT_REPOSITORY https://github.com/LucaRitz/laplacian-pyramid
+        GIT_TAG        main
 )
+FetchContent_MakeAvailable(laplacian_pyramid)
+
+unset(BUILD_TEST)
+unset(BUILD_DOCUMENTATION)
+unset(BUILD_CODE_DOCUMENTATION)
+unset(BUILD_EXT_LIBS)
 ```
+
+For an example setup of a project, have a look at [laplacian-pyramid-test](https://github.com/LucaRitz/laplacian-pyramid-test)

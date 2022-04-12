@@ -160,7 +160,7 @@ cv::Mat laplacian::LaplacianPyramid::reduceGaussian(
             for(int m = 0; m < kernel.rows; m++) {
 
                 for(int n = 0; n < kernel.cols; n++) {
-                    value += kernel.at<float>(m, n) * image.at<float>(i * 2 + m, j * 2 + n);
+                    value += kernel.at<float>(m, n) * image.at<float>((i << 1) + m, (j << 1) + n);
                 }
             }
             filtered.at<float>(i, j) = value;
@@ -189,14 +189,14 @@ cv::Mat laplacian::LaplacianPyramid::upsample(const cv::Mat& image, int rows, in
 
     cv::Mat upsampled(rows, cols, CV_32F);
 
+    int kernelHalfRows = (kernel.rows / 2);
+    int kernelHalfCols = (kernel.cols / 2);
+
     for (int i = 0; i < rows; i++) {
 
         for (int j = 0; j < cols; j++) {
 
             float value = 0.0f;
-
-            int kernelHalfRows = (kernel.rows / 2);
-            int kernelHalfCols = (kernel.cols / 2);
             for(int m = -kernelHalfRows; m <= kernelHalfRows; m++) {
 
                 for(int n = -kernelHalfCols; n <= kernelHalfCols; n++) {
