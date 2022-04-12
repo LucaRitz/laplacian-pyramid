@@ -35,10 +35,10 @@ Tested platforms:
 ```cmake
 include(FetchContent)
 
-option(BUILD_TEST "" OFF)
-option(BUILD_DOCUMENTATION "" OFF)
-option(BUILD_CODE_DOCUMENTATION "" OFF)
-option(BUILD_EXT_LIBS "" OFF)
+option(LAPLACIAN_PYRAMID_BUILD_TEST "" OFF)
+option(LAPLACIAN_PYRAMID_BUILD_DOCUMENTATION "" OFF)
+option(LAPLACIAN_PYRAMID_BUILD_CODE_DOCUMENTATION "" OFF)
+option(LAPLACIAN_PYRAMID_BUILD_EXT_LIBS "" OFF)
 
 FetchContent_Declare(
         laplacian_pyramid
@@ -47,10 +47,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(laplacian_pyramid)
 
-unset(BUILD_TEST)
-unset(BUILD_DOCUMENTATION)
-unset(BUILD_CODE_DOCUMENTATION)
-unset(BUILD_EXT_LIBS)
+unset(LAPLACIAN_PYRAMID_BUILD_TEST)
+unset(LAPLACIAN_PYRAMID_BUILD_DOCUMENTATION)
+unset(LAPLACIAN_PYRAMID_BUILD_CODE_DOCUMENTATION)
+unset(LAPLACIAN_PYRAMID_BUILD_EXT_LIBS)
 ```
 
 For an example setup of a project, have a look at [laplacian-pyramid-test](https://github.com/LucaRitz/laplacian-pyramid-test)
+
+Note that the cmake variables "OpenCV_LIBS" and "OpenCV_INCLUDE_DIRS" have to be known as soon as the above cmake snippet
+gets executed. This means you have to call the "find_package" command for opencv previously.

@@ -13,7 +13,6 @@ namespace laplacian::test {
 TEST(LaplacianPyramidTest, should_display_decoded_image_if_image_is_grayscale) {
 
     cv::Mat image = cv::imread("resources/lena.png", cv::IMREAD_GRAYSCALE);
-
     cv::imshow("Original", image);
 
     image.convertTo(image, CV_32F);
