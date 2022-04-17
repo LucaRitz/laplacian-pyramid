@@ -12,20 +12,26 @@ namespace laplacian::test {
 
 TEST(LaplacianPyramidTest, should_display_decoded_image_if_image_is_grayscale) {
 
-    cv::Mat image = cv::imread("resources/lena.png", cv::IMREAD_GRAYSCALE);
-    cv::imshow("Original", image);
+    for (int i = 0; i < 100; i++) {
+        cv::Mat image = cv::imread("resources/lena.png", cv::IMREAD_GRAYSCALE);
 
-    image.convertTo(image, CV_32F);
+        image.convertTo(image, CV_32F);
 
-    auto pyramid = laplacian::test::measured<laplacian::LaplacianPyramid>(
-            [&image]() -> laplacian::LaplacianPyramid { return laplacian::LaplacianPyramid{image, 5}; },
-            "Laplace-Pyramid creation");
+        auto pyramid = laplacian::test::measured<laplacian::LaplacianPyramid>(
+                [&image]() -> laplacian::LaplacianPyramid { return laplacian::LaplacianPyramid{image, 5}; },
+                "Laplace-Pyramid creation");
 
-    auto decoded = laplacian::test::measured<cv::Mat>(
-            [&pyramid]() -> cv::Mat { return pyramid.decode(); }, "Laplace-Pyramid decode");
-    decoded.convertTo(decoded, CV_8U);
-    cv::imshow("Decoded", decoded);
-    cv::waitKey(0);
+        auto decoded = laplacian::test::measured<cv::Mat>(
+                [&pyramid]() -> cv::Mat { return pyramid.decode(); }, "Laplace-Pyramid decode");
+        decoded.convertTo(decoded, CV_8U);
+
+        if ( i == 99) {
+            image.convertTo(image, CV_8U);
+            cv::imshow("Original", image);
+            cv::imshow("Decoded", decoded);
+            cv::waitKey(0);
+        }
+    }
 }
 
 TEST(LaplacianPyramid, should_display_decoded_image_if_image_is_color) {
