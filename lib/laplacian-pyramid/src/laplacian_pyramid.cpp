@@ -38,7 +38,17 @@ cv::Mat laplacian::LaplacianPyramid::at(uint8_t level) const {
     return _laplacianPlanesQuantized.at(level);
 }
 
+cv::Mat& laplacian::LaplacianPyramid::at(uint8_t level) {
+
+    return _laplacianPlanesQuantized.at(level);
+}
+
 cv::Mat laplacian::LaplacianPyramid::operator[](uint8_t level) const {
+
+    return at(level);
+}
+
+cv::Mat& laplacian::LaplacianPyramid::operator[](uint8_t level) {
 
     return at(level);
 }

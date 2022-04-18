@@ -55,6 +55,16 @@ namespace laplacian {
 
         /**
          *
+         * Gets a reference to the encoded image at the expected level.
+         *
+         * @param level The compression level of the expected laplacian image.
+         *
+         * @return A reference to the laplacian image at the given level.
+         */
+        [[nodiscard]] cv::Mat& at(uint8_t level);
+
+        /**
+         *
          * Gets an encoded laplacian image at the expected level.
          *
          * @param level The compression level of the expected laplacian image.
@@ -62,6 +72,16 @@ namespace laplacian {
          * @return The laplacian image at the given level.
          */
         [[nodiscard]] cv::Mat operator[](uint8_t level) const;
+
+        /**
+         *
+         * Gets a reference to the encoded image at the expected level.
+         *
+         * @param level The compression level of the expected laplacian image.
+         *
+         * @return A reference to the laplacian image at the given level.
+         */
+        [[nodiscard]] cv::Mat& operator[](uint8_t level);
 
         /**
          *

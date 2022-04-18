@@ -24,7 +24,7 @@ TEST(LaplacianPyramidTest, should_display_decoded_image_if_image_is_grayscale) {
                 [&pyramid]() -> cv::Mat { return pyramid.decode(); }, "Laplace-Pyramid decode");
         decoded.convertTo(decoded, CV_8U);
 
-        if ( i == 99) {
+        if (i == 99) {
             image.convertTo(image, CV_8U);
             cv::resize(decoded, decoded, cv::Size{image.rows, image.cols});
             cv::Mat difference = image - decoded;
@@ -38,7 +38,42 @@ TEST(LaplacianPyramidTest, should_display_decoded_image_if_image_is_grayscale) {
 
 TEST(LaplacianPyramid, should_display_decoded_image_if_image_is_color) {
 
-    // TODO: Implement
+    cv::Mat image = cv::imread("resources/lena.png", cv::IMREAD_COLOR);
+    image.convertTo(image, CV_32F);
+
+    cv::Mat bgr[3];
+    cv::split(image, bgr);
+
+    auto bluePyramid = laplacian::test::measured<laplacian::LaplacianPyramid>(
+            [&bgr]() -> laplacian::LaplacianPyramid { return laplacian::LaplacianPyramid{bgr[0], 5}; },
+            "Laplace-Pyramid blue creation");
+    auto greenPyramid = laplacian::test::measured<laplacian::LaplacianPyramid>(
+            [&bgr]() -> laplacian::LaplacianPyramid { return laplacian::LaplacianPyramid{bgr[1], 5}; },
+            "Laplace-Pyramid green creation");
+    auto redPyramid = laplacian::test::measured<laplacian::LaplacianPyramid>(
+            [&bgr]() -> laplacian::LaplacianPyramid { return laplacian::LaplacianPyramid{bgr[2], 5}; },
+            "Laplace-Pyramid red creation");
+
+    auto decodedBlue = laplacian::test::measured<cv::Mat>(
+            [&bluePyramid]() -> cv::Mat { return bluePyramid.decode(); }, "Laplace-Pyramid blue decode");
+    auto decodedGreen = laplacian::test::measured<cv::Mat>(
+            [&greenPyramid]() -> cv::Mat { return greenPyramid.decode(); }, "Laplace-Pyramid green decode");
+    auto decodedRed = laplacian::test::measured<cv::Mat>(
+            [&redPyramid]() -> cv::Mat { return redPyramid.decode(); }, "Laplace-Pyramid red decode");
+    cv::Mat decoded;
+    bgr[0] = decodedBlue;
+    bgr[1] = decodedGreen;
+    bgr[2] = decodedRed;
+    cv::merge(bgr, 3, decoded);
+    decoded.convertTo(decoded, CV_8U);
+
+    image.convertTo(image, CV_8U);
+    cv::resize(decoded, decoded, cv::Size{image.rows, image.cols});
+    cv::Mat difference = image - decoded;
+    cv::imshow("Original", image);
+    cv::imshow("Decoded", decoded);
+    cv::imshow("Difference", difference);
+    cv::waitKey(0);
 }
 
 TEST(LaplacianPyramid, shold_display_decoded_image_if_image_is_quantized) {
