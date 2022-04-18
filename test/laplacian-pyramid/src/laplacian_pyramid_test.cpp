@@ -10,7 +10,7 @@ namespace laplacian::test {
     R measured(const std::function<R ()>& function, const std::string& step = "");
 }
 
-TEST(LaplacianPyramidTest, should_display_decoded_image_if_image_is_grayscale) {
+TEST(LaplacianPyramid, should_display_decoded_image_if_image_is_grayscale) {
 
     for (int i = 0; i < 100; i++) {
         cv::Mat image = cv::imread("resources/lena.png", cv::IMREAD_GRAYSCALE);
