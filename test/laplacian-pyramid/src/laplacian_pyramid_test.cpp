@@ -14,7 +14,6 @@ TEST(LaplacianPyramidTest, should_display_decoded_image_if_image_is_grayscale) {
 
     for (int i = 0; i < 100; i++) {
         cv::Mat image = cv::imread("resources/lena.png", cv::IMREAD_GRAYSCALE);
-
         image.convertTo(image, CV_32F);
 
         auto pyramid = laplacian::test::measured<laplacian::LaplacianPyramid>(
@@ -27,8 +26,11 @@ TEST(LaplacianPyramidTest, should_display_decoded_image_if_image_is_grayscale) {
 
         if ( i == 99) {
             image.convertTo(image, CV_8U);
+            cv::resize(decoded, decoded, cv::Size{image.rows, image.cols});
+            cv::Mat difference = image - decoded;
             cv::imshow("Original", image);
             cv::imshow("Decoded", decoded);
+            cv::imshow("Difference", difference);
             cv::waitKey(0);
         }
     }

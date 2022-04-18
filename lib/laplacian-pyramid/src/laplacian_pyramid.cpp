@@ -1,4 +1,5 @@
 #include <laplacian-pyramid/laplacian_pyramid.hpp>
+#include <algorithm>
 
 laplacian::LaplacianPyramidException::LaplacianPyramidException(const std::string& message) :
     std::exception(message.c_str()) {
@@ -162,12 +163,15 @@ cv::Mat laplacian::LaplacianPyramid::reduceGaussian(
             float value = 0.0f;
             for(int m = -kernelHalfRows; m <= kernelHalfRows; m++) {
 
-                int row = kernelHalfRows + (i << 1);
+                int row = (i << 1) - m;
                 for(int n = -kernelHalfCols; n <= kernelHalfCols; n++) {
 
-                    int col = kernelHalfCols + (j << 1);
+                    int col = (j << 1) - n;
 
                     if (row >= 0 && col >= 0) {
+
+                        row = std::min(row, image.rows - 1);
+                        col = std::min(col, image.cols - 1);
                         value += kernel.at<float>(m + kernelHalfRows, n + kernelHalfCols) * image.at<float>(row, col);
                     }
                 }
@@ -176,6 +180,7 @@ cv::Mat laplacian::LaplacianPyramid::reduceGaussian(
 
         }
     }
+
     return filtered;
 }
 
@@ -208,17 +213,18 @@ cv::Mat laplacian::LaplacianPyramid::upsample(const cv::Mat& image, int rows, in
             float value = 0.0f;
             for(int m = -kernelHalfRows; m <= kernelHalfRows; m++) {
 
+                float row = static_cast<float>((i - m)) / 2.0f;
                 for(int n = -kernelHalfCols; n <= kernelHalfCols; n++) {
 
-                    float row = static_cast<float>((i - m)) / 2.0f;
                     float col = static_cast<float>((j - n)) / 2.0f;
 
                     if (isInteger(row) && row >= 0 &&
                         isInteger(col) && col >= 0) {
 
-                        col = col < image.cols ? col : image.cols - 1;
-                        row = row < image.rows ? row : image.rows - 1;
-                        value += kernel.at<float>(m + kernelHalfRows, n + kernelHalfCols) * image.at<float>(static_cast<int>(row), static_cast<int>(col));
+                        int rowI = std::min(static_cast<int>(row), image.rows - 1);
+                        int colI = std::min(static_cast<int>(col), image.cols - 1);
+
+                        value += kernel.at<float>(m + kernelHalfRows, n + kernelHalfCols) * image.at<float>(rowI, colI);
                     }
                 }
             }
